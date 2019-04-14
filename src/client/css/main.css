@@ -1,0 +1,225 @@
+/*-------------------------------------
+                MAIN
+--------------------------------------*/
+
+html {
+    box-sizing: border-box;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+    margin: 0;
+    padding: 0;
+}
+
+.form-control:focus {
+    box-shadow: none!important;
+    border-color: #ced4da!important;
+}
+
+html,
+body,
+canvas {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    width: 100%;
+    height: 100%;
+    background-color: #222;
+    background-image: url('https://drive.google.com/uc?export=view&id=0BzFF7FmbJUo5X0NEUXFVd0NBcWc');
+    background-size: cover;
+    background-position: 0 0;
+    background-repeat: no-repeat;
+    position: relative;
+    z-index: 0;
+}
+
+body:after {
+    content: '';
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    z-index: 1;
+    animation: thunder-bg 6s infinite;
+}
+
+canvas {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#canvas3 {
+    z-index: 5;
+}
+
+#canvas2 {
+    z-index: 10;
+}
+
+#canvas1 {
+    z-index: 100;
+}
+
+@-webkit-keyframes thunder-bg {
+    0% {
+        background-color: rgba(34, 34, 34, .9);
+    }
+
+    9% {
+        background-color: rgba(34, 34, 34, .9);
+    }
+
+    10% {
+        background-color: rgba(59, 59, 59, .3);
+    }
+
+    10.5% {
+        background-color: rgba(34, 34, 34, .9);
+    }
+
+    80% {
+        background-color: rgba(34, 34, 34, .9);
+    }
+
+    82% {
+        background-color: rgba(59, 59, 59, .3);
+    }
+
+    83% {
+        background-color: rgba(34, 34, 34, .9);
+    }
+
+    83.5% {
+        background-color: rgba(59, 59, 59, .3);
+    }
+
+    100% {
+        background-color: rgba(34, 34, 34, .9);
+    }
+}
+
+@font-face {
+    font-family: "SomethingStrange";
+    src: url("./../fonts/Something\ Strange.ttf");
+}
+
+/*-------------------------------------
+             GAME LOGO
+--------------------------------------*/
+
+.game-logo {
+    max-width: 50vw;
+    margin-top: -2vh;
+    object-fit: fill;
+}
+
+/*-------------------------------------
+             GAME MENU
+--------------------------------------*/
+
+.game-menu {
+    pointer-events: all;
+    cursor: pointer;
+    
+    z-index: 101;
+
+    filter: opacity(50%);
+}
+
+.game-menu .p_username {
+    background: rgba(0, 0, 0, 0.15);
+    outline: none;
+
+    color: #EFEFEF;
+}
+
+.game-menu .p_username:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+.game-menu .p_username::placeholder {
+    color: rgb(239, 239, 239, 0.5);
+}
+
+.game-menu .p_username:focus {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.game-menu .play-button {
+    filter: opacity(50%);
+
+    background: none;
+    border: none;
+
+    font-family: 'SomethingStrange', sans-serif;
+    font-size: 28px;
+    letter-spacing: .25em;
+
+    text-shadow: 4px 4px rgba(0, 0, 0, 0.6);
+}
+
+.game-menu .play-button:hover {
+    filter: opacity(75%);
+    transition: all ease-in-out;
+    text-shadow: 4px 4px rgba(100, 10, 10, 0.75);
+}
+
+.game-menu .play-button:focus {
+    filter: opacity(90%);
+    background: none!important;
+    box-shadow: none!important;
+    border-color: #ced4da!important;
+}
+
+/*-------------------------------------
+             CREDIT
+--------------------------------------*/
+
+.credit {
+    position: absolute;
+    bottom: 4%;
+
+    color: #EFEFEF;
+}
+
+.credit .heart {
+    background-image: url("https://s3-us-west-2.amazonaws.com/s.cdpn.io/9632/heart.png");
+    background-size: 100%;
+    background-repeat: no-repeat;
+    display: inline-block;
+    position: relative;
+    height: 20px;
+    width: 20px;
+    top: 6px;
+}
+
+@media screen and (max-width: 1000px) {
+    .game-logo {
+        max-width: 75vw;
+    }
+
+    .game-menu .play-button {
+        font-size: 20px;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    .game-logo {
+        max-width: 100vw;
+    }
+
+    .game-menu .play-button {
+        font-size: 14px;
+    }
+}
