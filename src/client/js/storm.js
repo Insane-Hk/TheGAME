@@ -16,6 +16,8 @@ var lightning = [];
 var lightTimeCurrent = 0;
 var lightTimeTotal = 0;
 
+var StormPlay = true;
+
 var w = canvas1.width = canvas2.width = canvas3.width = window.innerWidth;
 var h = canvas1.height = canvas2.height = canvas3.height = window.innerHeight;
 window.addEventListener('resize', function() {
@@ -182,16 +184,26 @@ function animateLightning() {
 }
 
 function init() {
-  createRainTrough();
-  createRain();
-  window.addEventListener('resize', createRainTrough);
+  if (StormPlay) {
+    createRainTrough();
+    createRain();
+    window.addEventListener('resize', createRainTrough);
+  }
 }
 init();
 
 function animloop() {
-  animateRainTrough();
-  animateRain();
-  animateLightning();
-  requestAnimationFrame(animloop);
+  if (StormPlay) {
+    animateRainTrough();
+    animateRain();
+    animateLightning();
+    requestAnimationFrame(animloop);
+  }
 }
+
+function StopStorm()
+{
+  StormPlay = false;
+}
+
 animloop();

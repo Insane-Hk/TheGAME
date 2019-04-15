@@ -24,24 +24,60 @@ function GetPlayerIndex(socketId)
     return index;
 }
 
+function UpdatePlayerData(index, key, data)
+{
+    Players[index][key] = data;
+}
+
+function LogToPlayer(player, message)
+{
+    player.emit("log", {
+        emitter: "TheGAME] [server",
+        message: message
+    })
+}
+
+function GenerateRandomColor()
+{
+    var r = Math.floor(Math.random() * 255)
+    var g = Math.floor(Math.random() * 255)
+    var b = Math.floor(Math.random() * 255)
+
+    return {r: r, g: g, b: b}
+}
+
 io.on("connection", function(socket) {
     console.log("[TheGAME] - USER (" + socket.id + ") connected");
-
+    LogToPlayer(socket, "Connexion au serveur validée (ID : " + socket.id + ")");
+    
     Players.push({
         id: socket.id, 
-        username: "#UNKNOWN"
+        username: "#UNKNOWN",
+        color: GenerateRandomColor(),
+        x: 0,
+        y: 0,
     });
+
+    LogToPlayer(io, "Connexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
 
     socket.on("disconnect", function() {
         console.log('[TheGAME] - USER (' + socket.id + ') disconnected');
         Players.splice(GetPlayerIndex(socket.id));
+
+        LogToPlayer(io, "Déconnexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
     });
 
     socket.on("PlayGame", function(datas) {
-        console.log('[TheGAME] - Set `username` of user (' + socket.id + ') to ' + datas.username);
-
         var p_index = GetPlayerIndex(socket.id);
-        Players[p_index].username = datas.username;
+        
+        console.log('[TheGAME] - Set `username` of user (' + socket.id + ') to ' + datas.username);
+        LogToPlayer(socket, "Votre nom d'utilisateur est maintenant `" + datas.username + "` (ID : " + socket.id + ")");
+
+        UpdatePlayerData(p_index, "username", datas.username)
+
+        socket.emit("EnterGameScreen", {
+            p_datas: Players[p_index]
+        });
     });
 })
 
