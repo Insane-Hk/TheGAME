@@ -13,12 +13,15 @@ app.get("/", function(req, res) {
 
 function GetPlayerIndex(socketId)
 {
+    var index = null;
     Players.forEach((Player, key) => {
         if (Player.id === socketId)
         {
-            return key;
+            index = key;
         }
     });
+
+    return index;
 }
 
 io.on("connection", function(socket) {
@@ -37,12 +40,8 @@ io.on("connection", function(socket) {
     socket.on("PlayGame", function(datas) {
         console.log('[TheGAME] - Set `username` of user (' + socket.id + ') to ' + datas.username);
 
-        Players.forEach((Player, key) => {
-            if (Player.id === socket.id)
-            {
-                Player.username = datas.username;
-            }
-        });
+        var p_index = GetPlayerIndex(socket.id);
+        Players[p_index].username = datas.username;
     });
 })
 
