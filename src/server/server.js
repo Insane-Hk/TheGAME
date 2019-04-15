@@ -54,8 +54,8 @@ io.on("connection", function(socket) {
         id: socket.id, 
         username: "#UNKNOWN",
         color: GenerateRandomColor(),
-        x: 0,
-        y: 0,
+        x: 0.0,
+        y: 0.0,
     });
 
     LogToPlayer(io, "Connexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
