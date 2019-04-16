@@ -4,12 +4,19 @@ $(function () {
     var global = {
         FPS: 0,
 
+        m_datas: {
+            UP: false,
+            DOWN: false,
+            LEFT: false,
+            RIGHT: false,
+        },
+
         KEY_UP: 38,
         KEY_DOWN: 40,
         KEY_LEFT: 37,
         KEY_RIGHT: 39,
 
-        move_ratio: 5,
+        move_ratio: 2,
 
         gameWidth: 5000,
         gameHeight: 5000,
@@ -22,6 +29,8 @@ $(function () {
 
         lineColor: "#000",
         backgroundColor: "#222222",
+
+        fb_datas: [],
 
         mouseCoord: {
             x: 0,
@@ -59,6 +68,22 @@ $(function () {
                 x: evt.clientX - rect.left,
                 y: evt.clientY - rect.top
             };
+        },
+
+        processBullets: function()
+        {
+            global.fb_datas.forEach((bullet, key) => {
+                bullet.x += bullet.dx;
+                bullet.y += bullet.dy;
+
+                if (bullet.x < 0.0 || bullet.x > global.screenWidth || bullet.y < 0.0 || bullet.y > global.screenHeight)
+                {
+                    bullet.dx = 0.0;
+                    bullet.dy = 0.0;
+
+                    global.fb_datas.splice(key, 1);
+                }
+            });
         },
 
         drawCircle: function (centerX, centerY, radius, color) 
@@ -170,6 +195,21 @@ $(function () {
             });
         },
 
+        draw_bullets: function()
+        {
+            global.fb_datas.forEach(bullet => {
+                this.graph.beginPath();
+                this.graph.globalAlpha = 1;
+
+                this.drawPolygon(this.graph, bullet.x, bullet.y, 
+                    10, 5, -Math.PI/2);
+
+                this.graph.fillStyle = "#FBD570";
+                this.graph.fill();
+                this.graph.stroke();
+            });
+        },
+
         draw_mouseCursor: function()
         {
             this.drawCircle(global.mouseCoord.x, global.mouseCoord.y, 10, 
@@ -208,8 +248,49 @@ $(function () {
             });
         },
 
+        move: function () {
+            if (global.m_datas.UP)
+            {
+                if (global.p_datas.y > 0.0)
+                    global.p_datas.y -= global.move_ratio;
+                else
+                    global.p_datas.y = 0.0;
+            }
+
+            if (global.m_datas.DOWN)
+            {
+                if (global.p_datas.y < global.gameHeight)
+                    global.p_datas.y += global.move_ratio;
+                else
+                    global.p_datas.y = global.gameHeight;
+            }
+
+            if (global.m_datas.LEFT)
+            {
+                if (global.p_datas.x > 0.0)
+                    global.p_datas.x -= global.move_ratio;
+                else
+                    global.p_datas.x = 0.0;
+            }
+
+            if (global.m_datas.RIGHT)
+            {
+                if (global.p_datas.x < global.gameWidth)
+                    global.p_datas.x += global.move_ratio;
+                else
+                    global.p_datas.x = global.gameWidth;
+            }
+
+            socket.emit("UpdateCoords", {x: global.p_datas.x, y: global.p_datas.y});
+        },
+
         game_loop: function () {
             global.animLoopHandle = window.requestAnimFrame(GameArea.game_loop);
+
+            if (global.m_datas.UP || global.m_datas.DOWN || global.m_datas.LEFT || global.m_datas.RIGHT)
+            {
+                GameArea.move();
+            }
 
             if ((global.p_datas.x < 10 || global.p_datas.x > (global.gameWidth - 10)) || (global.p_datas.y < 10 || global.p_datas.y > (global.gameHeight - 10)))
             {
@@ -227,53 +308,13 @@ $(function () {
             GameArea.draw_oplayers();
             GameArea.draw_player();
 
+            GameArea.draw_bullets();
+
             GameArea.draw_mouseCursor();
 
             GameArea.handle_bonusGathering();
-        },
 
-        move: function (direction) {
-            switch (direction)
-            {
-                case "UP":
-                    if (global.p_datas.y > 0.0)
-                        global.p_datas.y -= global.move_ratio;
-                    else
-                        global.p_datas.y = 0.0;
-
-                    break;
-
-                case "DOWN":
-                    if (global.p_datas.y < global.gameHeight)
-                        global.p_datas.y += global.move_ratio;
-                    else
-                        global.p_datas.y = global.gameHeight;
-
-                    break;
-
-                case "LEFT":
-                    if (global.p_datas.x > 0.0)
-                        global.p_datas.x -= global.move_ratio;
-                    else
-                        global.p_datas.x = 0.0;
-
-                    break;
-
-                case "RIGHT":
-                    if (global.p_datas.x < global.gameWidth)
-                        global.p_datas.x += global.move_ratio;
-                    else
-                        global.p_datas.x = global.gameWidth;
-
-                    break;
-
-                default : 
-                    break;
-            }
-
-            socket.emit("UpdateCoords", {x: global.p_datas.x, y: global.p_datas.y});
-
-            //log("[TheGAME] [client] - Coordonnées {x: " + global.p_datas.x + ", y: " + global.p_datas.y + "}");
+            GameArea.processBullets();
         },
 
         populate_playerBoard: function()
@@ -367,25 +408,60 @@ $(function () {
         global.mouseCoord = GameArea.getMouseCoord(event);
     });
 
+    $("#game-canvas").on("click", function(event)
+    {
+        var x = global.mouseCoord.x;
+        var y = global.mouseCoord.y;
+
+        var angle = Math.atan2(y - global.screenHeight / 2, x - global.screenWidth / 2);
+
+        global.fb_datas.push({
+            x: global.screenWidth / 2,
+            y: global.screenHeight / 2,
+
+            dx: Math.cos(angle) * 2.5,
+            dy: Math.sin(angle) * 2.5,
+        });
+    });
+
     $(document).keydown(function (event) {
         var key = event.keyCode;
 
         if (key == global.KEY_UP) {
-            GameArea.move("UP");
+            global.m_datas.UP = true
         }
 
         if (key == global.KEY_DOWN) {
-            GameArea.move("DOWN");
+            global.m_datas.DOWN = true
         }
 
         if (key == global.KEY_LEFT) {
-            GameArea.move("LEFT");
+            global.m_datas.LEFT = true
         }
 
         if (key == global.KEY_RIGHT) {
-            GameArea.move("RIGHT");
+            global.m_datas.RIGHT = true
+        }
+    });
+
+    $(document).keyup(function (event) {
+        var key = event.keyCode;
+
+        if (key == global.KEY_UP) {
+            global.m_datas.UP = false
         }
 
+        if (key == global.KEY_DOWN) {
+            global.m_datas.DOWN = false
+        }
+
+        if (key == global.KEY_LEFT) {
+            global.m_datas.LEFT = false
+        }
+
+        if (key == global.KEY_RIGHT) {
+            global.m_datas.RIGHT = false
+        }
     });
 
     window.addEventListener('resize', function () {
