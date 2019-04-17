@@ -16,6 +16,28 @@ $(function () {
             BulletVelocity: 2.0,
         },
 
+        MASTER_ISSOU: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletLifeTime: 4.0,
+            BulletVelocity: 2.5,
+            BulletSize: {
+                w: 32,
+                h: 32,
+            },
+            BulletImage: "issou",
+        },
+
+        MACRON_DECHAINER: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletLifeTime: 4.0,
+            BulletVelocity: 2.5,
+            BulletSize: {
+                w: 120,
+                h: 62.8,
+            },
+            BulletImage: "macron",
+        },
+
         DEV: {
             FireType: weaponFireTypes.SINGLE,
             BulletLifeTime: 3.0,
@@ -223,9 +245,20 @@ $(function () {
                 this.graph.beginPath();
                 this.graph.globalAlpha = 1;
 
-                this.drawPolygon(this.graph, bullet.x - global.p_datas.x + global.screenWidth / 2, 
-                    bullet.y  - global.p_datas.y + global.screenHeight / 2, 
-                    10, 5, -Math.PI/2);
+                if (weaponTypes[global.p_datas.weapon].BulletImage)
+                {
+                    var x = bullet.x - global.p_datas.x + global.screenWidth / 2 - weaponTypes[global.p_datas.weapon].BulletSize.w / 2;
+                    var y = bullet.y  - global.p_datas.y + global.screenHeight / 2 - weaponTypes[global.p_datas.weapon].BulletSize.h / 2;
+
+                    this.graph.drawImage(document.getElementById(weaponTypes[global.p_datas.weapon].BulletImage), x, y,
+                        weaponTypes[global.p_datas.weapon].BulletSize.w, weaponTypes[global.p_datas.weapon].BulletSize.h)
+                }
+                else
+                {
+                    this.drawPolygon(this.graph, bullet.x - global.p_datas.x + global.screenWidth / 2, 
+                        bullet.y  - global.p_datas.y + global.screenHeight / 2, 
+                        10, 5, -Math.PI/2);
+                }
 
                 this.graph.fillStyle = "#FBD570";
                 this.graph.fill();
@@ -473,6 +506,22 @@ $(function () {
 
         if (key == global.KEY_RIGHT) {
             global.m_datas.RIGHT = true
+        }
+
+        if (key == 110) {
+            global.p_datas.weapon = "DEV"
+        }
+
+        if (key == 96) {
+            global.p_datas.weapon = "PISTOL"
+        }
+
+        if (key == 97) {
+            global.p_datas.weapon = "MASTER_ISSOU"
+        }
+
+        if (key == 98) {
+            global.p_datas.weapon = "MACRON_DECHAINER"
         }
     });
 
