@@ -1,6 +1,7 @@
 $(function () {
     var socket = io();
 
+    // TYPE DE TIR
     var weaponFireTypes = {
         SINGLE: 0,
         SEMIAUTO: 1,
@@ -9,6 +10,7 @@ $(function () {
         AUTO: 4
     };
 
+    // TOUTES LES ARMES
     var weaponTypes = {
         PISTOL: {
             FireType: weaponFireTypes.SINGLE,
@@ -45,11 +47,12 @@ $(function () {
 
         DEV: {
             FireType: weaponFireTypes.SINGLE,
-            BulletLifeTime: 3.0,
+            BulletLifeTime: 5.0,
             BulletVelocity: 5.0,
         },
     };
 
+    // VARIABLES GLOBALES
     var global = {
         FPS: 0,
 
@@ -87,6 +90,7 @@ $(function () {
         },
     };
 
+    // GESTION DE TOUT LE JEU
     var GameArea = {
         canvas: $("#game-canvas"),
         graph: null,
@@ -413,6 +417,7 @@ $(function () {
         },
     }
 
+    // EVENEMENTS VENANT DU SERVEUR
     socket.on("EnterGameScreen", function (datas) {
         log("[TheGAME] [client] - Changement de vue Lobby => Jeu");
 
@@ -436,6 +441,7 @@ $(function () {
         global.b_datas = datas.b_datas;
     });
 
+    // CACHER LE MENU DU JEU
     function hideLobby() {
         StopStorm();
 
@@ -454,6 +460,7 @@ $(function () {
         $("body").css("background-color", "#222222");
     }
 
+    // EVENEMENT SUR APPUI DU BOUTON PLAY
     $(".play-button").click(function () {
         if ($(".p_username").val().length !== 0)
         {
@@ -467,11 +474,13 @@ $(function () {
         }
     });
 
+    // EVENEMENT SUR LE MOUVMEENT DE LA SOURIS
     $("#game-canvas").on("mousemove", function(event)
     {
         global.mouseCoord = GameArea.getMouseCoord(event);
     });
 
+    // EVENEMENT SUR LE CLICK
     $("#game-canvas").on("click", function(event)
     {
         var x = global.mouseCoord.x;
@@ -494,6 +503,7 @@ $(function () {
         });
     });
 
+    // EVENEMENT SUR LES TOUCHE
     $(document).keydown(function (event) {
         var key = event.keyCode;
 
@@ -550,10 +560,12 @@ $(function () {
         }
     });
 
+    // REDIMENSIONNER LE CANVAS LORS DE LA REDIMENSION DE LA FENETRE
     window.addEventListener('resize', function () {
         GameArea.resize();
     })
 
+    // TIMER DE BOUCLE
     window.requestAnimFrame = (function () {
         return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -569,6 +581,7 @@ $(function () {
             window.mozCancelAnimationFrame;
     })();
 
+    // LOGGGER
     socket.on("log", function (datas) {
         log("[" + datas.emitter + "] - " + datas.message)
     });
