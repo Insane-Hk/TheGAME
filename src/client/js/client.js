@@ -171,6 +171,20 @@ $(function () {
             };
         },
 
+        checkCollision_bullets: function()
+        {
+            global.fb_datas.forEach((bullet, key) => {
+                if (this.getDistance({x: global.p_datas.x, y: global.p_datas.y, radius: 20}, {x: bullet.x, y: bullet.y, radius: 10}) < 10)
+                {
+                    if (bullet.lifeTime >= 5.0)
+                    {
+                        console.log("Aie")
+                        global.fb_datas.splice(key, 1);
+                    }
+                }
+            });
+        },
+
         processBullets: function()
         {
             global.fb_datas.forEach((bullet, key) => {
@@ -311,7 +325,7 @@ $(function () {
                     this.graph.translate(x, y)
                     this.graph.rotate(bullet.angle - 80.1);
 
-                    this.graph.drawImage(document.getElementById(), 
+                    this.graph.drawImage(document.getElementById(bullet.ammo_datas.BulletImage), 
                        -bullet.ammo_datas.BulletSize.w / 2, -bullet.ammo_datas.BulletSize.h / 2,
                         bullet.ammo_datas.BulletSize.w, bullet.ammo_datas.BulletSize.h)
 
@@ -450,6 +464,7 @@ $(function () {
             GameArea.handle_bonusGathering();
 
             GameArea.processBullets();
+            GameArea.checkCollision_bullets();
 
             GameArea.populate_playerBoard();
         },
