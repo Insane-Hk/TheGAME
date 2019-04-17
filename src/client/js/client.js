@@ -1,6 +1,28 @@
 $(function () {
     var socket = io();
 
+    var weaponFireTypes = {
+        SINGLE: 0,
+        SEMIAUTO: 1,
+        BURST2: 2,
+        BURST3: 3,
+        AUTO: 4
+    };
+
+    var weaponTypes = {
+        PISTOL: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletLifeTime: 3.0,
+            BulletVelocity: 2.0,
+        },
+
+        DEV: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletLifeTime: 3.0,
+            BulletVelocity: 5.0,
+        },
+    };
+
     var global = {
         FPS: 0,
 
@@ -76,10 +98,10 @@ $(function () {
                 bullet.x += bullet.dx;
                 bullet.y += bullet.dy;
 
-                if (bullet.x < 0.0 || bullet.x > global.screenWidth || bullet.y < 0.0 || bullet.y > global.screenHeight)
+                if (bullet.lifeTime >= weaponTypes[global.p_datas.weapon].BulletLifeTime * 10)
                 {
-                    bullet.dx = 0.0;
-                    bullet.dy = 0.0;
+                    bullet.dx = 0;
+                    bullet.dy = 0;
 
                     global.fb_datas.splice(key, 1);
                 }
@@ -172,11 +194,11 @@ $(function () {
             this.graph.textAlign = "center";
             this.graph.fillText(global.p_datas.username, global.screenWidth / 2, global.screenHeight / 2 + 40);
 
-            
+            /*
             this.graph.font = "13px Arial";
             this.graph.textAlign = "center";
             this.graph.fillText("{x: " + global.p_datas.x + " - y: " + global.p_datas.y + "}", global.screenWidth / 2, global.screenHeight / 2 + 60);
-            /**/
+            */
         },
 
         draw_oplayers: function()
@@ -201,12 +223,15 @@ $(function () {
                 this.graph.beginPath();
                 this.graph.globalAlpha = 1;
 
-                this.drawPolygon(this.graph, bullet.x, bullet.y, 
+                this.drawPolygon(this.graph, bullet.x - global.p_datas.x + global.screenWidth / 2, 
+                    bullet.y  - global.p_datas.y + global.screenHeight / 2, 
                     10, 5, -Math.PI/2);
 
                 this.graph.fillStyle = "#FBD570";
                 this.graph.fill();
                 this.graph.stroke();
+
+                bullet.lifeTime += 0.1
             });
         },
 
@@ -284,6 +309,30 @@ $(function () {
             socket.emit("UpdateCoords", {x: global.p_datas.x, y: global.p_datas.y});
         },
 
+        populate_playerBoard: function()
+        {
+            /*
+
+            $(".players-list .players").html("");
+
+            global.op_datas.forEach(player => {
+                $(".players-list .players").append(`
+                    <div class="row mb-2 mx-1">
+                        <span class="mr-auto">${player.username}</span>
+                        <span class="ml-auto"></span>
+                    </div>
+                `);
+            });
+
+            */
+
+            $(".players-list h6").html(`${global.op_datas.length} JOUEURS - ${global.b_datas.length} BONUS <br> 
+                        POSITION : { x: ${global.p_datas.x}, y: ${global.p_datas.y}}<br>
+                        VIE: ${global.p_datas.health} - ARMURE: ${global.p_datas.armor} <br> 
+                        ARME : ${global.p_datas.weapon}`);
+            $(".players-list").show();
+        },
+
         game_loop: function () {
             global.animLoopHandle = window.requestAnimFrame(GameArea.game_loop);
 
@@ -315,27 +364,8 @@ $(function () {
             GameArea.handle_bonusGathering();
 
             GameArea.processBullets();
-        },
 
-        populate_playerBoard: function()
-        {
-            /*
-
-            $(".players-list .players").html("");
-
-            global.op_datas.forEach(player => {
-                $(".players-list .players").append(`
-                    <div class="row mb-2 mx-1">
-                        <span class="mr-auto">${player.username}</span>
-                        <span class="ml-auto"></span>
-                    </div>
-                `);
-            });
-
-            */
-
-            $(".players-list h6").text(`${global.op_datas.length} JOUEURS - ${global.b_datas.length} BONUS`);
-            $(".players-list").show();
+            GameArea.populate_playerBoard();
         },
 
         start: function () {
@@ -416,11 +446,13 @@ $(function () {
         var angle = Math.atan2(y - global.screenHeight / 2, x - global.screenWidth / 2);
 
         global.fb_datas.push({
-            x: global.screenWidth / 2,
-            y: global.screenHeight / 2,
+            x: global.p_datas.x,
+            y: global.p_datas.y,
 
-            dx: Math.cos(angle) * 2.5,
-            dy: Math.sin(angle) * 2.5,
+            dx: Math.cos(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
+            dy: Math.sin(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
+
+            lifeTime: 0.0,
         });
     });
 
