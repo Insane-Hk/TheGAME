@@ -7,7 +7,7 @@ var global = {
     max_gameWidth: 5000,
     max_gameHeight: 5000,
 
-    max_bonuses: 40,
+    max_bonuses: 50,
 };
 
 var Players = [];

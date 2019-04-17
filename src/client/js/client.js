@@ -14,17 +14,39 @@ $(function () {
     var weaponTypes = {
         PISTOL: {
             FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 10.0,
             BulletLifeTime: 3.0,
             BulletVelocity: 2.0,
             BulletSize: {
-                w: 11,
-                h: 30.5,
+                w: 5.5,
+                h: 15.25,
             },
             BulletImage: "9mm",
         },
 
+        LANCE_ROCKET: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 10.0,
+            BulletLifeTime: 3.0,
+            BulletVelocity: 2.0,
+            BulletSize: {
+                w: 25,
+                h: 60.5,
+            },
+            BulletImage: "rocket",
+
+            OnDied: {
+                BulletImage: "explosion",
+                BulletSize: {
+                    w: 25,
+                    h: 35,
+                },
+            }
+        },
+
         MASTER_ISSOU: {
             FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 10.0,
             BulletLifeTime: 4.0,
             BulletVelocity: 2.5,
             BulletSize: {
@@ -36,6 +58,7 @@ $(function () {
 
         MACRON_DECHAINER: {
             FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 10.0,
             BulletLifeTime: 4.0,
             BulletVelocity: 2.5,
             BulletSize: {
@@ -45,8 +68,33 @@ $(function () {
             BulletImage: "macron",
         },
 
+        LA_PUNITION: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 10.0,
+            BulletLifeTime: 4.0,
+            BulletVelocity: 2.5,
+            BulletSize: {
+                w: 25.125,
+                h: 32.5,
+            },
+            BulletImage: "romain",
+        },
+
+        L_ASSOMEUR: {
+            FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 10.0,
+            BulletLifeTime: 4.0,
+            BulletVelocity: 2.5,
+            BulletSize: {
+                w: 28.021,
+                h: 37.71,
+            },
+            BulletImage: "benoit",
+        },
+
         DEV: {
             FireType: weaponFireTypes.SINGLE,
+            BulletDamage: 50.0,
             BulletLifeTime: 5.0,
             BulletVelocity: 5.0,
         },
@@ -263,7 +311,7 @@ $(function () {
                     this.graph.translate(x, y)
                     this.graph.rotate(bullet.angle - 80.1);
 
-                    this.graph.drawImage(document.getElementById(bullet.ammo_datas.BulletImage), 
+                    this.graph.drawImage(document.getElementById(), 
                        -bullet.ammo_datas.BulletSize.w / 2, -bullet.ammo_datas.BulletSize.h / 2,
                         bullet.ammo_datas.BulletSize.w, bullet.ammo_datas.BulletSize.h)
 
@@ -523,20 +571,31 @@ $(function () {
             global.m_datas.RIGHT = true
         }
 
-        if (key == 110) {
-            global.p_datas.weapon = "DEV"
-        }
-
         if (key == 96) {
             global.p_datas.weapon = "PISTOL"
         }
 
         if (key == 97) {
-            global.p_datas.weapon = "MASTER_ISSOU"
+            global.p_datas.weapon = "LANCE_ROCKET"
         }
 
-        if (key == 98) {
+        if (key == 102) {
+            global.p_datas.weapon = "MASTER_ISSOU"
+        }
+        if (key == 103) {
             global.p_datas.weapon = "MACRON_DECHAINER"
+        }
+
+        if (key == 104) {
+            global.p_datas.weapon = "LA_PUNITION"
+        }
+
+        if (key == 105) {
+            global.p_datas.weapon = "L_ASSOMEUR"
+        }
+
+        if (key == 110) {
+            global.p_datas.weapon = "DEV"
         }
     });
 
