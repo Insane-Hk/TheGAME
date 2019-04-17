@@ -14,6 +14,11 @@ $(function () {
             FireType: weaponFireTypes.SINGLE,
             BulletLifeTime: 3.0,
             BulletVelocity: 2.0,
+            BulletSize: {
+                w: 11,
+                h: 30.5,
+            },
+            BulletImage: "9mm",
         },
 
         MASTER_ISSOU: {
@@ -245,13 +250,20 @@ $(function () {
                 this.graph.beginPath();
                 this.graph.globalAlpha = 1;
 
-                if (weaponTypes[global.p_datas.weapon].BulletImage)
+                if (bullet.ammo_datas.BulletImage)
                 {
-                    var x = bullet.x - global.p_datas.x + global.screenWidth / 2 - weaponTypes[global.p_datas.weapon].BulletSize.w / 2;
-                    var y = bullet.y  - global.p_datas.y + global.screenHeight / 2 - weaponTypes[global.p_datas.weapon].BulletSize.h / 2;
+                    var x = bullet.x - global.p_datas.x + global.screenWidth / 2;
+                    var y = bullet.y  - global.p_datas.y + global.screenHeight / 2;
 
-                    this.graph.drawImage(document.getElementById(weaponTypes[global.p_datas.weapon].BulletImage), x, y,
-                        weaponTypes[global.p_datas.weapon].BulletSize.w, weaponTypes[global.p_datas.weapon].BulletSize.h)
+                    this.graph.save();
+                    this.graph.translate(x, y)
+                    this.graph.rotate(bullet.angle - 80.1);
+
+                    this.graph.drawImage(document.getElementById(bullet.ammo_datas.BulletImage), 
+                       -bullet.ammo_datas.BulletSize.w / 2, -bullet.ammo_datas.BulletSize.h / 2,
+                        bullet.ammo_datas.BulletSize.w, bullet.ammo_datas.BulletSize.h)
+
+                    this.graph.restore();
                 }
                 else
                 {
@@ -344,25 +356,14 @@ $(function () {
 
         populate_playerBoard: function()
         {
-            /*
-
-            $(".players-list .players").html("");
-
-            global.op_datas.forEach(player => {
-                $(".players-list .players").append(`
-                    <div class="row mb-2 mx-1">
-                        <span class="mr-auto">${player.username}</span>
-                        <span class="ml-auto"></span>
-                    </div>
-                `);
-            });
-
-            */
-
-            $(".players-list h6").html(`${global.op_datas.length} JOUEURS - ${global.b_datas.length} BONUS <br> 
-                        POSITION : { x: ${global.p_datas.x}, y: ${global.p_datas.y}}<br>
-                        VIE: ${global.p_datas.health} - ARMURE: ${global.p_datas.armor} <br> 
-                        ARME : ${global.p_datas.weapon}`);
+            $(".players-list p").html(`
+                <strong>
+                    ${global.op_datas.length} JOUEURS - ${global.b_datas.length} BONUS <br> 
+                    POSITION : { x: ${global.p_datas.x}, y: ${global.p_datas.y}}<br>
+                    VIE: ${global.p_datas.health} - ARMURE: ${global.p_datas.armor} <br> 
+                    ARME: ${global.p_datas.weapon}
+                </strong>
+            `);
             $(".players-list").show();
         },
 
@@ -485,7 +486,11 @@ $(function () {
             dx: Math.cos(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
             dy: Math.sin(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
 
+            angle: angle,
+
             lifeTime: 0.0,
+
+            ammo_datas: weaponTypes[global.p_datas.weapon],
         });
     });
 

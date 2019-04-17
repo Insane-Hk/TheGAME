@@ -213,6 +213,10 @@ canvas {
     background: rgba(0, 0, 0, 0.0);
 }
 
+.players-list p {
+    font-size: 14px;
+}
+
 .players-list hr {
     border-color: rgba(255, 255, 255, 0.4);
 }
