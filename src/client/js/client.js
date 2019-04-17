@@ -39,8 +39,8 @@ $(function () {
             BulletLifeTime: 4.0,
             BulletVelocity: 2.5,
             BulletSize: {
-                w: 120,
-                h: 62.8,
+                w: 60,
+                h: 31.4,
             },
             BulletImage: "macron",
         },
