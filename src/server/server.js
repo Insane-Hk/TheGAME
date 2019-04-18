@@ -8,6 +8,29 @@ var global = {
     max_gameHeight: 5000,
 
     max_bonuses: 50,
+
+    bonus_datas: [
+        BONUS_LANCE_ROCKET = {
+            TYPE: "WEAPON",
+            ITEM: "LANCE_ROCKET",
+        },
+        BONUS_MASTER_ISSOU = {
+            TYPE: "WEAPON",
+            ITEM: "MASTER_ISSOU",
+        },
+        BONUS_MACRON_DECHAINER = {
+            TYPE: "WEAPON",
+            ITEM: "MACRON_DECHAINER",
+        },
+        BONUS_LA_PUNITION = {
+            TYPE: "WEAPON",
+            ITEM: "LA_PUNITION",
+        },
+        BONUS_L_ASSOMEUR = {
+            TYPE: "WEAPON",
+            ITEM: "L_ASSOMEUR",
+        },
+    ],
 };
 
 var Players = [];
@@ -68,10 +91,13 @@ function GenerateBonuses()
     {
         var position = GenerateRandomCoords();
 
+        var type = Math.floor(Math.random() * global.bonus_datas.length);
+
         var bonus_datas = {
             id: i,
             type: "Bonus",
             color: GenerateRandomColor(),
+            bonus: global.bonus_datas[type],
             x: position.x,
             y: position.y,
         };
@@ -84,7 +110,7 @@ function GenerateBonuses()
 
 io.on("connection", function(socket) {
     console.log("[TheGAME] - USER (" + socket.id + ") connected");
-    LogToPlayer(socket, "Connexion au serveur validée (ID : " + socket.id + ")");
+    //LogToPlayer(socket, "Connexion au serveur validée (ID : " + socket.id + ")");
 
     var p_Position = GenerateRandomCoords()
     
@@ -96,12 +122,13 @@ io.on("connection", function(socket) {
         armor: 0,
         lifes: 3,
         weapon: "PISTOL",
+        bullets: [],
         bonus: [],
         x: p_Position.x,
         y: p_Position.y,
     });
 
-    LogToPlayer(io, "Connexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
+    //LogToPlayer(io, "Connexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
 
     socket.on("disconnect", function() {
         console.log('[TheGAME] - USER (' + socket.id + ') disconnected');
@@ -145,6 +172,16 @@ io.on("connection", function(socket) {
         })
     });
 
+    socket.on("UpdateBullets", function(datas) {
+        var p_index = GetPlayerIndex(socket.id);
+
+        UpdatePlayerData(p_index, "bullets", datas.bullets);
+
+        io.emit("UpdatePlayers", {
+            op_datas: Players
+        })
+    });
+
     socket.on("BonusGathered", function(datas)
     {
         var p_index = GetPlayerIndex(socket.id);
@@ -161,7 +198,35 @@ io.on("connection", function(socket) {
             b_datas: Bonuses
         })
     });
+
+    setInterval(() => {
+        if (Players.length > 0)
+        {
+            Players.forEach(Player => {
+                
+                Player.bullets.forEach((bullet, key) => {
+                    bullet.x += bullet.dx;
+                    bullet.y += bullet.dy;
+    
+                    if (bullet.lifeTime >= bullet.ammo_datas.BulletLifeTime * 10)
+                    {
+                        bullet.dx = 0;
+                        bullet.dy = 0;
+    
+                        Player.bullets.splice(key, 1);
+                    }
+
+                    bullet.lifeTime += 0.1;
+                });
+            });
+
+            io.emit("UpdatePlayers", {
+                op_datas: Players
+            })
+        }
+    }, 50);
 })
+
 
 http.listen(3000, function() {
     console.log("[TheGAME] - Server is running on port 3000.");

@@ -197,8 +197,19 @@ $(function () {
                     bullet.dy = 0;
 
                     global.fb_datas.splice(key, 1);
+
+                    socket.emit("UpdateBullets", {
+                        bullets: global.fb_datas
+                    });
                 }
             });
+
+            if (global.fb_datas.length > 0)
+            {
+                socket.emit("UpdateBullets", {
+                    bullets: global.fb_datas
+                });
+            }
         },
 
         drawCircle: function (centerX, centerY, radius, color) 
@@ -274,6 +285,9 @@ $(function () {
                 this.graph.fillText("ID : " + object.id, 
                     object.x - global.p_datas.x + global.screenWidth / 2, 
                     object.y - global.p_datas.y + global.screenHeight / 2 + 50);
+                this.graph.fillText("ITEM : " + object.bonus.ITEM, 
+                    object.x - global.p_datas.x + global.screenWidth / 2, 
+                    object.y - global.p_datas.y + global.screenHeight / 2 + 70);
                 /**/
             });
         },
@@ -346,6 +360,45 @@ $(function () {
             });
         },
 
+        draw_op_bullets: function()
+        {
+            global.op_datas.forEach(player => {
+               // if (player.id !== global.p_datas.id && player.username !== "#UNKNOWN")
+               // {
+                    player.bullets.forEach(bullet => {
+                        this.graph.beginPath();
+                        this.graph.globalAlpha = 1;
+        
+                        if (bullet.ammo_datas.BulletImage)
+                        {
+                            var x = bullet.x - global.p_datas.x + global.screenWidth / 2;
+                            var y = bullet.y  - global.p_datas.y + global.screenHeight / 2;
+        
+                            this.graph.save();
+                            this.graph.translate(x, y)
+                            this.graph.rotate(bullet.angle - 80.1);
+        
+                            this.graph.drawImage(document.getElementById(bullet.ammo_datas.BulletImage), 
+                               -bullet.ammo_datas.BulletSize.w / 2, -bullet.ammo_datas.BulletSize.h / 2,
+                                bullet.ammo_datas.BulletSize.w, bullet.ammo_datas.BulletSize.h)
+        
+                            this.graph.restore();
+                        }
+                        else
+                        {
+                            this.drawPolygon(this.graph, bullet.x - global.p_datas.x + global.screenWidth / 2, 
+                                bullet.y  - global.p_datas.y + global.screenHeight / 2, 
+                                10, 5, -Math.PI/2);
+                        }
+        
+                        this.graph.fillStyle = "#FBD570";
+                        this.graph.fill();
+                        this.graph.stroke();
+                    });
+                //}
+            });
+        },
+
         draw_mouseCursor: function()
         {
             this.drawCircle(global.mouseCoord.x, global.mouseCoord.y, 10, 
@@ -377,6 +430,12 @@ $(function () {
                     if (!bool)
                     {
                         console.log("[TheGAME] [client] - Bonus récupéré (ID: " + object.id + ")");
+
+                        if (object.bonus.TYPE == "WEAPON")
+                        {
+                            global.p_datas.weapon = object.bonus.ITEM;
+                        }
+
                         socket.emit("BonusGathered", {bonus: object})
                         global.p_datas.bonus.push(object);
                     }               
@@ -455,15 +514,17 @@ $(function () {
             GameArea.draw_bonus();
 
             GameArea.draw_oplayers();
+            GameArea.draw_op_bullets();
+            
             GameArea.draw_player();
 
-            GameArea.draw_bullets();
+            //GameArea.draw_bullets();
 
             GameArea.draw_mouseCursor();
 
             GameArea.handle_bonusGathering();
 
-            GameArea.processBullets();
+            //GameArea.processBullets();
             GameArea.checkCollision_bullets();
 
             GameArea.populate_playerBoard();
@@ -474,7 +535,7 @@ $(function () {
             this.graph = this.canvas[0].getContext("2d");
             this.resize();
 
-            this.populate_playerBoard();
+            //this.populate_playerBoard();
 
             this.game_loop();
         },
@@ -496,7 +557,7 @@ $(function () {
     {
         global.op_datas = datas.op_datas;
 
-        GameArea.populate_playerBoard();
+        //GameArea.populate_playerBoard();
     });
 
     socket.on("UpdateBonuses", function(datas)
@@ -551,18 +612,27 @@ $(function () {
 
         var angle = Math.atan2(y - global.screenHeight / 2, x - global.screenWidth / 2);
 
-        global.fb_datas.push({
-            x: global.p_datas.x,
-            y: global.p_datas.y,
+        global.op_datas.forEach(player => {
+            if (player.id === global.p_datas.id)
+            {
+                player.bullets.push({
+                    x: global.p_datas.x,
+                    y: global.p_datas.y,
+        
+                    dx: Math.cos(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
+                    dy: Math.sin(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
+        
+                    angle: angle,
+        
+                    lifeTime: 0.0,
+        
+                    ammo_datas: weaponTypes[global.p_datas.weapon],
+                });
 
-            dx: Math.cos(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
-            dy: Math.sin(angle) * weaponTypes[global.p_datas.weapon].BulletVelocity,
-
-            angle: angle,
-
-            lifeTime: 0.0,
-
-            ammo_datas: weaponTypes[global.p_datas.weapon],
+                socket.emit("UpdateBullets", {
+                    bullets: player.bullets
+                })
+            }
         });
     });
 
