@@ -30,6 +30,46 @@ var global = {
             TYPE: "WEAPON",
             ITEM: "L_ASSOMEUR",
         },
+        BONUS_SMALL_ARMOR = {
+            TYPE: "ARMOR",
+            ITEM: "ARMURE NIVEAU 1",
+            VALUE: 25,
+        },
+        BONUS_MED_ARMOR = {
+            TYPE: "ARMOR",
+            ITEM: "ARMURE NIVEAU 2",
+            VALUE: 50,
+        },
+        BONUS_MAX_ARMOR = {
+            TYPE: "ARMOR",
+            ITEM: "ARMURE NIVEAU 3",
+            VALUE: 100,
+        },
+        BONUS_HEALTH_REGEN_SMALL = {
+            TYPE: "HEALTH",
+            ITEM: "PETITE POTION REGENERATION",
+            VALUE: 25,
+        },
+        BONUS_HEALTH_REGEN_MED = {
+            TYPE: "HEALTH",
+            ITEM: "MOYENNE POTION REGENERATION",
+            VALUE: 50,
+        },
+        BONUS_HEALTH_REGEN_LARGE = {
+            TYPE: "HEALTH",
+            ITEM: "GRANDE POTION REGENERATION",
+            VALUE: 75,
+        },
+        BONUS_SPEED_UP = {
+            TYPE: "SPEED",
+            ITEM: "BONUS VITESSE",
+            VALUE: 3,
+        },
+        BONUS_SPEED_DOWN = {
+            TYPE: "SPEED",
+            ITEM: "MALUS VITESSE",
+            VALUE: 1,
+        },
     ],
 };
 

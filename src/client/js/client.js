@@ -431,9 +431,37 @@ $(function () {
                     {
                         console.log("[TheGAME] [client] - Bonus récupéré (ID: " + object.id + ")");
 
-                        if (object.bonus.TYPE == "WEAPON")
+                        switch (object.bonus.TYPE)
                         {
-                            global.p_datas.weapon = object.bonus.ITEM;
+                            case "WEAPON":
+                                global.p_datas.weapon = object.bonus.ITEM;
+                                break;
+                            case "ARMOR":
+                                if (global.p_datas.armor + object.bonus.VALUE >= 100)
+                                {
+                                    global.p_datas.armor = 100;
+                                }
+                                else
+                                {
+                                    global.p_datas.armor += object.bonus.VALUE;
+                                }
+                                break;
+                            case "HEALTH":
+                                if (global.p_datas.health + object.bonus.VALUE >= 100)
+                                {
+                                    global.p_datas.health = 100;
+                                }
+                                else
+                                {
+                                    global.p_datas.health += object.bonus.VALUE;
+                                }
+                                break;
+                            case "SPEED":
+                                global.move_ratio = object.bonus.VALUE;
+                                break;
+                            default:
+
+                                break;
                         }
 
                         socket.emit("BonusGathered", {bonus: object})
