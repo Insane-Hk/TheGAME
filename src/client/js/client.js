@@ -14,9 +14,9 @@ $(function () {
     var weaponTypes = {
         PISTOL: {
             FireType: weaponFireTypes.SINGLE,
-            BulletDamage: 10.0,
+            BulletDamage: 4.0,
             BulletLifeTime: 3.0,
-            BulletVelocity: 2.0,
+            BulletVelocity: 3.0,
             BulletSize: {
                 w: 5.5,
                 h: 15.25,
@@ -26,7 +26,7 @@ $(function () {
 
         LANCE_ROCKET: {
             FireType: weaponFireTypes.SINGLE,
-            BulletDamage: 10.0,
+            BulletDamage: 15.0,
             BulletLifeTime: 3.0,
             BulletVelocity: 2.0,
             BulletSize: {
@@ -48,7 +48,7 @@ $(function () {
             FireType: weaponFireTypes.SINGLE,
             BulletDamage: 10.0,
             BulletLifeTime: 4.0,
-            BulletVelocity: 2.5,
+            BulletVelocity: 4.0,
             BulletSize: {
                 w: 32,
                 h: 32,
@@ -60,7 +60,7 @@ $(function () {
             FireType: weaponFireTypes.SINGLE,
             BulletDamage: 10.0,
             BulletLifeTime: 4.0,
-            BulletVelocity: 2.5,
+            BulletVelocity: 4.0,
             BulletSize: {
                 w: 60,
                 h: 31.4,
@@ -70,9 +70,9 @@ $(function () {
 
         LA_PUNITION: {
             FireType: weaponFireTypes.SINGLE,
-            BulletDamage: 10.0,
+            BulletDamage: 15.0,
             BulletLifeTime: 4.0,
-            BulletVelocity: 2.5,
+            BulletVelocity: 5.0,
             BulletSize: {
                 w: 25.125,
                 h: 32.5,
@@ -82,9 +82,9 @@ $(function () {
 
         L_ASSOMEUR: {
             FireType: weaponFireTypes.SINGLE,
-            BulletDamage: 10.0,
+            BulletDamage: 2.0,
             BulletLifeTime: 4.0,
-            BulletVelocity: 2.5,
+            BulletVelocity: 0.5,
             BulletSize: {
                 w: 28.021,
                 h: 37.71,
@@ -311,7 +311,7 @@ $(function () {
         draw_oplayers: function()
         {
             global.op_datas.forEach(player => {
-                if (player.id !== global.p_datas.id && player.username !== "#UNKNOWN")
+                if (player.id !== global.p_datas.id && player.username !== "#UNKNOWN" & !player.IsDead)
                 {
                     this.drawCircle(player.x - global.p_datas.x + global.screenWidth / 2, player.y - global.p_datas.y + global.screenHeight / 2, 20, 
                         "rgb(" + player.color.r + ", " + player.color.g + ", " + player.color.b + ")");
@@ -445,6 +445,8 @@ $(function () {
                                 {
                                     global.p_datas.armor += object.bonus.VALUE;
                                 }
+
+                                socket.emit("UpdateHealthAndArmor", {health: global.p_datas.health, armor: global.p_datas.armor});
                                 break;
                             case "HEALTH":
                                 if (global.p_datas.health + object.bonus.VALUE >= 100)
@@ -455,6 +457,8 @@ $(function () {
                                 {
                                     global.p_datas.health += object.bonus.VALUE;
                                 }
+
+                                socket.emit("UpdateHealthAndArmor", {health: global.p_datas.health, armor: global.p_datas.armor});
                                 break;
                             case "SPEED":
                                 global.move_ratio = object.bonus.VALUE;
@@ -472,6 +476,10 @@ $(function () {
         },
 
         move: function () {
+            if (global.p_datas.IsDead)
+                return;
+
+
             if (global.m_datas.UP)
             {
                 if (global.p_datas.y > 0.0)
@@ -523,39 +531,46 @@ $(function () {
         game_loop: function () {
             global.animLoopHandle = window.requestAnimFrame(GameArea.game_loop);
 
-            if (global.m_datas.UP || global.m_datas.DOWN || global.m_datas.LEFT || global.m_datas.RIGHT)
+            if (global.p_datas.IsDead)
             {
-                GameArea.move();
-            }
 
-            if ((global.p_datas.x < 10 || global.p_datas.x > (global.gameWidth - 10)) || (global.p_datas.y < 10 || global.p_datas.y > (global.gameHeight - 10)))
-            {
-                global.backgroundColor = "#A00000";
             }
             else
             {
-                global.backgroundColor = "#222222";
+                if (global.m_datas.UP || global.m_datas.DOWN || global.m_datas.LEFT || global.m_datas.RIGHT)
+                {
+                    GameArea.move();
+                }
+    
+                if ((global.p_datas.x < 10 || global.p_datas.x > (global.gameWidth - 10)) || (global.p_datas.y < 10 || global.p_datas.y > (global.gameHeight - 10)))
+                {
+                    global.backgroundColor = "#A00000";
+                }
+                else
+                {
+                    global.backgroundColor = "#222222";
+                }
+    
+                GameArea.draw_grid();
+    
+                GameArea.draw_bonus();
+    
+                GameArea.draw_oplayers();
+                GameArea.draw_op_bullets();
+                
+                GameArea.draw_player();
+    
+                //GameArea.draw_bullets();
+    
+                GameArea.draw_mouseCursor();
+    
+                GameArea.handle_bonusGathering();
+    
+                //GameArea.processBullets();
+                GameArea.checkCollision_bullets();
+    
+                GameArea.populate_playerBoard();
             }
-
-            GameArea.draw_grid();
-
-            GameArea.draw_bonus();
-
-            GameArea.draw_oplayers();
-            GameArea.draw_op_bullets();
-            
-            GameArea.draw_player();
-
-            //GameArea.draw_bullets();
-
-            GameArea.draw_mouseCursor();
-
-            GameArea.handle_bonusGathering();
-
-            //GameArea.processBullets();
-            GameArea.checkCollision_bullets();
-
-            GameArea.populate_playerBoard();
         },
 
         start: function () {
@@ -593,6 +608,29 @@ $(function () {
         global.b_datas = datas.b_datas;
     });
 
+    socket.on("DamageReceived", function(datas)
+    {
+        if (global.p_datas.id === datas.sende)
+        {
+            console.log("Damage Applied !");
+        }
+        
+        if (global.p_datas.id === datas.receiver)
+        {
+            global.p_datas.health = datas.new_health;
+            global.p_datas.armor = datas.new_armor;
+
+            console.log("Damage Received !");
+
+            if (global.p_datas.health <= 0)
+            {
+                global.p_datas.IsDead = true;
+                socket.emit("PlayerDied");
+                $(".end").show();
+            }
+        }
+    });
+
     // CACHER LE MENU DU JEU
     function hideLobby() {
         StopStorm();
@@ -626,6 +664,11 @@ $(function () {
         }
     });
 
+    // EVENEMENT SUR APPUI DU BOUTON RETRY
+    $(".retry-button").click(function () {
+        location.reload();
+    });
+
     // EVENEMENT SUR LE MOUVMEENT DE LA SOURIS
     $("#game-canvas").on("mousemove", function(event)
     {
@@ -635,6 +678,9 @@ $(function () {
     // EVENEMENT SUR LE CLICK
     $("#game-canvas").on("click", function(event)
     {
+        if (global.p_datas.IsDead)
+            return;
+
         var x = global.mouseCoord.x;
         var y = global.mouseCoord.y;
 

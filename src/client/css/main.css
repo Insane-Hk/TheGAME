@@ -222,6 +222,59 @@ canvas {
 }
 
 /*-------------------------------------
+                END
+--------------------------------------*/
+
+.end {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    color: #EFEFEF;
+    background-color: #303030;
+}
+
+.end .container {
+    margin-top: 20%;
+}
+
+.end h1 {
+    font-family: 'SomethingStrange', sans-serif;
+    font-size: 52px;
+    letter-spacing: .25em;
+}
+
+.end .retry-button {
+    filter: opacity(50%);
+
+    background: none;
+    border: none;
+
+    font-family: 'SomethingStrange', sans-serif;
+    font-size: 28px;
+    letter-spacing: .25em;
+
+    text-shadow: 4px 4px rgba(0, 0, 0, 0.6);
+}
+
+.end .retry-button:hover {
+    filter: opacity(75%);
+    transition: all ease-in-out;
+    text-shadow: 4px 4px rgba(100, 10, 10, 0.75);
+}
+
+.end .retry-button:focus {
+    filter: opacity(90%);
+    background: none!important;
+    box-shadow: none!important;
+    border-color: #ced4da!important;
+}
+
+/*-------------------------------------
              CREDIT
 --------------------------------------*/
 

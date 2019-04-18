@@ -148,14 +148,18 @@ function GenerateBonuses()
     console.log("[TheGAME] - `Bonus` generated !");
 }
 
+function getDistance(p1, p2) {
+    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2)) - p1.radius - p2.radius;
+};
+
 io.on("connection", function(socket) {
     console.log("[TheGAME] - USER (" + socket.id + ") connected");
-    //LogToPlayer(socket, "Connexion au serveur validée (ID : " + socket.id + ")");
 
     var p_Position = GenerateRandomCoords()
     
     Players.push({
-        id: socket.id, 
+        id: socket.id,
+        //socket: socket, 
         username: "#UNKNOWN",
         color: GenerateRandomColor(),
         health: 100,
@@ -166,26 +170,34 @@ io.on("connection", function(socket) {
         bonus: [],
         x: p_Position.x,
         y: p_Position.y,
+        IsDead: false,
     });
-
-    //LogToPlayer(io, "Connexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
 
     socket.on("disconnect", function() {
         console.log('[TheGAME] - USER (' + socket.id + ') disconnected');
-        Players.splice(GetPlayerIndex(socket.id));
+        //Players.splice(GetPlayerIndex(socket.id), 1);
+
+        Players.forEach((player, key) => {
+            if (player.id === socket.id)
+            {
+                Players.splice(key, 1);
+            }
+        });
+
+        console.log(Players)
 
         io.emit("UpdatePlayers", {
             op_datas: Players
-        })
+        });
 
-        LogToPlayer(io, "Déconnexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
+        //LogToPlayer(io, "Déconnexion de l'utilisateur " + socket.id + " (Joueurs : " + Players.length + ").");
     });
 
     socket.on("PlayGame", function(datas) {
         var p_index = GetPlayerIndex(socket.id);
         
         console.log('[TheGAME] - Set `username` of user (' + socket.id + ') to ' + datas.username);
-        LogToPlayer(socket, "Votre nom d'utilisateur est maintenant `" + datas.username + "` (ID : " + socket.id + ")");
+        //LogToPlayer(socket, "Votre nom d'utilisateur est maintenant `" + datas.username + "` (ID : " + socket.id + ")");
 
         UpdatePlayerData(p_index, "username", datas.username)
 
@@ -206,6 +218,18 @@ io.on("connection", function(socket) {
 
         UpdatePlayerData(p_index, "x", datas.x);
         UpdatePlayerData(p_index, "y", datas.y);
+
+        io.emit("UpdatePlayers", {
+            op_datas: Players
+        })
+    });
+
+    socket.on("UpdateHealthAndArmor", function(datas)
+    {
+        var p_index = GetPlayerIndex(socket.id);
+
+        UpdatePlayerData(p_index, "health", datas.health);
+        UpdatePlayerData(p_index, "armor", datas.armor);
 
         io.emit("UpdatePlayers", {
             op_datas: Players
@@ -239,6 +263,17 @@ io.on("connection", function(socket) {
         })
     });
 
+    socket.on("PlayerDied", function()
+    {
+        var p_index = GetPlayerIndex(socket.id);
+
+        UpdatePlayerData(p_index, "IsDead", true);
+
+        io.emit("UpdatePlayers", {
+            op_datas: Players
+        });
+    });
+
     setInterval(() => {
         if (Players.length > 0)
         {
@@ -257,6 +292,75 @@ io.on("connection", function(socket) {
                     }
 
                     bullet.lifeTime += 0.1;
+
+                    if (bullet.lifeTime > 2)
+                    {
+                        Players.forEach(Player_ => {
+                            var p1 ={
+                                x: Player_.x,
+                                y: Player_.y,
+                                radius: 20,
+                            };
+
+                            var p2 = {
+                                x: bullet.x,
+                                y: bullet.y,
+                                radius: 10,
+                            };
+
+                            if (getDistance(p1, p2) < 5 && !Player_.IsDead)
+                            {
+                                var damage = bullet.ammo_datas.BulletDamage;
+                                var armor = Player_.armor;
+                                var health = Player_.health;
+
+                                if (armor > 0)
+                                {
+                                    if (armor - damage > 0)
+                                    {
+                                        armor -= damage;
+                                    }
+                                    else
+                                    {
+                                        damage -= armor;
+                                        armor = 0;
+
+                                        if (health - damage > 0)
+                                        {
+                                            health -= damage;
+                                        }
+                                        else
+                                        {
+                                            health = 0;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    if (health - damage > 0)
+                                    {
+                                        health -= damage;
+                                    }
+                                    else
+                                    {
+                                        health = 0;
+                                    }
+                                }
+
+                                Player_.health = health;
+                                Player_.armor = armor;
+
+                                io.emit("DamageReceived", {
+                                    sender: Player.id,
+                                    receiver: Player_.id,
+                                    new_armor: armor,
+                                    new_health: health,
+                                });
+                                
+                                Player.bullets.splice(key, 1);
+                            }
+                        });
+                    }
                 });
             });
 
@@ -266,7 +370,6 @@ io.on("connection", function(socket) {
         }
     }, 50);
 })
-
 
 http.listen(3000, function() {
     console.log("[TheGAME] - Server is running on port 3000.");
