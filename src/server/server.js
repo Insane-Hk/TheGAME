@@ -371,7 +371,7 @@ io.on("connection", function(socket) {
     }, 50);
 })
 
-http.listen(3000, function() {
+http.listen(3000, "0.0.0.0", function() {
     console.log("[TheGAME] - Server is running on port 3000.");
 
     console.log("[TheGAME] - Generating `Bonus`...");
